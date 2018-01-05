@@ -63,14 +63,31 @@ class RedisSocket {
             throw RedisError.connection("Cannot Connect")
         }
 
+        do {
+            try setSocketOptions(socketDescriptor)
+        } catch {
+            throw error
+        }
+
+        // Connect
+        #if os(Linux)
+        let connStatus = Glibc.connect(socketDescriptor, addrInfo.pointee.ai_addr, addrInfo.pointee.ai_addrlen)
+        try RedisSocket.decodeConnectStatus(connStatus: connStatus)
+        #else
+        let connStatus = Darwin.connect(socketDescriptor, addrInfo.pointee.ai_addr, addrInfo.pointee.ai_addrlen)
+        try RedisSocket.decodeConnectStatus(connStatus: connStatus)
+        #endif
+    }
+
+    private func setSocketOptions(_ socketDescriptor: Int32) throws {
         // set socket options
         var optval = 1
         #if os(Linux)
-        let statusSocketOpt = setsockopt(socketDescriptor, SOL_SOCKET, SO_REUSEADDR,
-                                         &optval, socklen_t(MemoryLayout<Int>.stride))
+            let statusSocketOpt = setsockopt(socketDescriptor, SOL_SOCKET, SO_REUSEADDR,
+                                             &optval, socklen_t(MemoryLayout<Int>.stride))
         #else
-        let statusSocketOpt = setsockopt(socketDescriptor, SOL_SOCKET, SO_NOSIGPIPE,
-                                         &optval, socklen_t(MemoryLayout<Int>.stride))
+            let statusSocketOpt = setsockopt(socketDescriptor, SOL_SOCKET, SO_NOSIGPIPE,
+                                             &optval, socklen_t(MemoryLayout<Int>.stride))
         #endif
 
         do {
@@ -83,15 +100,6 @@ class RedisSocket {
             #endif
             throw error
         }
-
-        // Connect
-        #if os(Linux)
-        let connStatus = Glibc.connect(socketDescriptor, addrInfo.pointee.ai_addr, addrInfo.pointee.ai_addrlen)
-        try RedisSocket.decodeConnectStatus(connStatus: connStatus)
-        #else
-        let connStatus = Darwin.connect(socketDescriptor, addrInfo.pointee.ai_addr, addrInfo.pointee.ai_addrlen)
-        try RedisSocket.decodeConnectStatus(connStatus: connStatus)
-        #endif
     }
 
     func read() -> Data {
