@@ -66,12 +66,7 @@ class Parser {
 
             index += 2
             
-            if let value = String(bytes: buffer, encoding: .utf8)
-            {
-                return value
-            } else {
-                return Data(bytes: buffer)
-            }
+            return Data(bytes: buffer)
             
         case .simpleString:
             var buffer = [UInt8]()
