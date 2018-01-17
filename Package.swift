@@ -7,8 +7,11 @@ let package = Package(
     products: [
         .library(name: "RedShot", targets: ["RedShot"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/OperatorFoundation/Datable.git", from: "0.0.5")
+    ],
     targets:[
-        .target(name:"RedShot", dependencies: []),
+        .target(name:"RedShot", dependencies: ["Datable"]),
         .testTarget(name: "RedShotTests", dependencies: ["RedShot"])
     ]
 )

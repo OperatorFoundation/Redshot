@@ -16,6 +16,8 @@ import Foundation
     import Darwin
 #endif
 
+import Datable
+
 class RedisSocket {
 
     private let socketDescriptor: Int32
@@ -140,17 +142,12 @@ class RedisSocket {
         return sent
     }
 
-    @discardableResult func send(data: Data) throws -> Int {
+    @discardableResult func send(_ datable: Datable) throws -> Int {
+        let data = datable.data
         guard !data.isEmpty else { return 0}
 
         return try data.withUnsafeBytes { [unowned self](buffer: UnsafePointer<UInt8>) throws -> Int in
             return self.send(buffer: buffer, bufferSize: data.count)
-        }
-    }
-
-    @discardableResult func send(string: String) -> Int {
-       return string.utf8CString.withUnsafeBufferPointer {
-            return self.send(buffer: $0.baseAddress!, bufferSize: $0.count - 1)
         }
     }
 

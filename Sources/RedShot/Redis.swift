@@ -11,6 +11,7 @@
 
 import Foundation
 import Dispatch
+import Datable
 
 public enum RedisError: Error {
 
@@ -57,49 +58,54 @@ public class Redis {
         }
     }
 
-    private func processCmd(_ cmd: String) throws -> RedisType {
+    private func processCmd(_ cmd: Data) throws -> RedisType {
         if !self.isConnected {
             redisSocket = try RedisSocket(hostname: self.hostname, port: self.port)
             if let password = password {
                 let _: Bool = try self.auth(password: password)
             }
         }
-
-        redisSocket.send(string: cmd)
+        
+        do {
+            try redisSocket.send(cmd)
+        } catch {
+            throw error
+        }
         let data = redisSocket.read()
-
+        
         let bytes = data.withUnsafeBytes {
             [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
         }
-
+        
         let parser = Parser(bytes: bytes)
         return try parser.parse()
     }
-
-    @discardableResult public func sendCommand(_ cmd: String, values: [String]) throws -> RedisType {
-        var command = "*"
-        command.append("\(values.count + 1)")
-        command.append("\r\n")
+    
+    @discardableResult public func sendCommand(_ cmd: String, values: [Datable]) throws -> RedisType {
+        var command = "*".data
+        command.append("\(values.count + 1)".data)
+        command.append("\r\n".data)
         command.append(redisBulkString(value: cmd))
-
+        
         for value in values {
             command.append(redisBulkString(value: value))
         }
-
+        
         return try processCmd(command)
     }
-
-    private func redisBulkString(value: String) -> String {
-        var buffer = "$"
-        let strLength = value.count
-        buffer.append("\(strLength)")
-        buffer.append("\r\n")
-        buffer.append(value)
-        buffer.append("\r\n")
-
+    
+    private func redisBulkString(value: Datable) -> Data {
+        var buffer = "$".data
+        let data = value.data
+        let strLength = data.count
+        buffer.append("\(strLength)".data)
+        buffer.append("\r\n".data)
+        buffer.append(data)
+        buffer.append("\r\n".data)
+        
         return buffer
     }
-
+    
     /// Subscribes the client to the specified channel.
     ///
     /// - Parameters:
@@ -110,7 +116,11 @@ public class Redis {
         let subscribeSocket = try RedisSocket(hostname: hostname, port: port)
 
         if let password = self.password {
-            subscribeSocket.send(string: "AUTH \(password)\r\n")
+            do {
+                try subscribeSocket.send("AUTH \(password)\r\n")
+            } catch {
+                throw error
+            }
             let data = subscribeSocket.read()
             let bytes = data.withUnsafeBytes {
                 [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
@@ -126,22 +136,27 @@ public class Redis {
         subscriber[channel] = subscribeSocket
 
         DispatchQueue.global(qos: .userInitiated).async {
-            subscribeSocket.send(string: "SUBSCRIBE \(channel)\r\n")
-            while subscribeSocket.isConnected {
-
-                let data = subscribeSocket.read()
-
-                let bytes = data.withUnsafeBytes {
-                    [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
-                }
-                if !bytes.isEmpty {
-                    do {
-                        let parser = Parser(bytes: bytes)
-                        callback(try parser.parse(), nil)
-                    } catch {
-                        callback(nil, error)
+            do {
+                try subscribeSocket.send("SUBSCRIBE \(channel)\r\n")
+                
+                while subscribeSocket.isConnected {
+                    
+                    let data = subscribeSocket.read()
+                    
+                    let bytes = data.withUnsafeBytes {
+                        [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
+                    }
+                    if !bytes.isEmpty {
+                        do {
+                            let parser = Parser(bytes: bytes)
+                            callback(try parser.parse(), nil)
+                        } catch {
+                            callback(nil, error)
+                        }
                     }
                 }
+            } catch {
+                callback(nil, error)
             }
         }
     }

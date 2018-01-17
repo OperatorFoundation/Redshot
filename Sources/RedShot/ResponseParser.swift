@@ -64,11 +64,15 @@ class Parser {
                 index += 1
             }
 
-            guard let value = String(bytes: buffer, encoding: .utf8) else {
-                throw RedisError.parseResponse
-            }
             index += 2
-            return value
+            
+            if let value = String(bytes: buffer, encoding: .utf8)
+            {
+                return value
+            } else {
+                return Data(bytes: buffer)
+            }
+            
         case .simpleString:
             var buffer = [UInt8]()
 
