@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Datable
 
 extension Redis {
 
@@ -56,7 +57,7 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Returns: the value of key, or NSNull when key does not exist.
     /// - Throws: something bad happened.
-    public func get(key: String) throws -> RedisType {
+    public func get(key: Datable) throws -> RedisType {
         return try sendCommand("GET", values: [key])
     }
 
@@ -70,7 +71,7 @@ extension Redis {
     ///   - expire: If not nil, set the specified expire time, in milliseconds.
     /// - Returns: A simple string reply OK if SET was executed correctly.
     /// - Throws: something bad happened.
-    public func set(key: String, value: String, exist: Bool? = nil, expire: TimeInterval? = nil) throws -> RedisType {
+    public func set(key: Datable, value: Datable, exist: Bool? = nil, expire: TimeInterval? = nil) throws -> RedisType {
         var cmd = [key, value]
 
         if let exist = exist {
@@ -95,7 +96,7 @@ extension Redis {
     /// - Returns: Integer reply - the number of elements that were added to the set,
     ///            not including all the elements already present into the set.
     /// - Throws: a RedisError.
-    public func sadd(key: String, values: String...) throws -> RedisType {
+    public func sadd(key: Datable, values: Datable...) throws -> RedisType {
         var vals = [key]
         vals.append(contentsOf: values)
         return try sendCommand("SADD", values: vals)
@@ -106,7 +107,7 @@ extension Redis {
     /// - Parameter key: The keys.
     /// - Returns: Array reply - all elements of the set.
     /// - Throws: a RedisError.
-    public func smbembers(key: String) throws -> RedisType {
+    public func smbembers(key: Datable) throws -> RedisType {
       return try sendCommand("SMEMBERS", values: [key])
     }
 
@@ -125,7 +126,7 @@ extension Redis {
     ///   - values: the values
     /// - Returns: Integer reply - the length of the list after the push operations.
     /// - Throws: a RedisError.
-    public func lpush(key: String, values: String...) throws -> RedisType {
+    public func lpush(key: Datable, values: Datable...) throws -> RedisType {
         var vals = [key]
         vals.append(contentsOf: values)
         return try sendCommand("LPUSH", values: vals)
@@ -136,7 +137,7 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Returns: Bulk string reply - the value of the first element, or nil when key does not exist.
     /// - Throws: a RedisError.
-    public func lpop(key: String) throws -> RedisType {
+    public func lpop(key: Datable) throws -> RedisType {
       return try sendCommand("LPOP", values: [key])
     }
 
@@ -164,7 +165,7 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Returns: Integer reply - the value of key after the increment
     /// - Throws: a RedisError
-    public func incr(key: String) throws -> RedisType {
+    public func incr(key: Datable) throws -> RedisType {
     	return try sendCommand("INCR", values: [key])
     }
 
@@ -190,7 +191,7 @@ extension Redis {
     ///            1 if field is a new field in the hash and value was set.
     ///            0 if field already exists in the hash and the value was updated.
     /// - Throws:  a RedisError
-    public func hset(key: String, field: String, value: String) throws -> RedisType {
+    public func hset(key: Datable, field: Datable, value: Datable) throws -> RedisType {
         return try sendCommand("HSET", values: [key, field, value])
     }
 
@@ -202,7 +203,7 @@ extension Redis {
     /// - Returns: Bulk string reply: the value associated with field, or nil when field is not present in the hash
     ///            or key does not exist.
     /// - Throws: a RedisError
-    public func hget(key: String, field: String) throws -> RedisType {
+    public func hget(key: Datable, field: Datable) throws -> RedisType {
         return try sendCommand("HGET", values: [key, field])
     }
 
@@ -211,7 +212,7 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Returns: a dictionary.
     /// - Throws: a RedisError
-    public func hgetAll(key: String) throws -> [String: String] {
+    public func hgetAll(key: Datable) throws -> [String: String] {
         var dictionary: [String: String] = [:]
         if let result = try sendCommand("HGETALL", values: [key]) as? Array<String> {
             let tuples = stride(from: 0, to: result.count, by: 2).map { num in
