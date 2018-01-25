@@ -128,8 +128,8 @@ extension Redis {
     /// - Returns: the new score of the member.
     /// - Throws: a RedisError.
     
-    public func zincr(key: Datable, increment: Int) throws -> RedisType {
-        return try sendCommand("ZINCRBY", values: [key, increment])
+    public func zincrby(setKey: Datable, increment: Int, fieldKey: Datable) throws -> RedisType {
+        return try sendCommand("ZINCRBY", values: [setKey, "\(increment)", fieldKey])
     }
 
     //MARK: Lists
