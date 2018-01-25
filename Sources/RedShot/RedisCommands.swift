@@ -85,6 +85,8 @@ extension Redis {
         return try sendCommand("SET", values: cmd)
     }
 
+    //MARK: Sets
+    
     /// Add the specified members to the set stored at key.
     /// Specified members that are already a member of this set are ignored.
     /// If key does not exist, a new set is created before adding the specified members.
@@ -110,7 +112,28 @@ extension Redis {
     public func smbembers(key: Datable) throws -> RedisType {
       return try sendCommand("SMEMBERS", values: [key])
     }
+    
+    //MARK: Sorted Sets
+    
+    /// Increments the score of member in the sorted set stored at key by increment.
+    /// If member does not exist in the sorted set, it is added with increment as its score (as if its previous score was 0.0).
+    /// If key does not exist, a new sorted set with the specified member as its sole member is created.
+    /// An error is returned when key exists but does not hold a sorted set.
+    /// The score value should be the string representation of a numeric value, and accepts double precision floating point numbers.
+    /// It is possible to provide a negative value to decrement the score.
+    ///
+    /// - Parameters:
+    ///   - key: The key.
+    ///   - increment: the interger value to increment by
+    /// - Returns: the new score of the member.
+    /// - Throws: a RedisError.
+    
+    public func zincr(key: Datable, increment: Int) throws -> RedisType {
+        return try sendCommand("ZINCRBY", values: [key, increment])
+    }
 
+    //MARK: Lists
+    
     /// Insert all the specified values at the head of the list stored at key.
     /// If key does not exist, it is created as empty list before performing the push operations.
     /// When key holds a value that is not a list, an error is returned.
