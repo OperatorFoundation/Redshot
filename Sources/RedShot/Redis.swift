@@ -94,9 +94,30 @@ public class Redis {
         return try processCmd(command)
     }
     
-    private func redisBulkString(value: Datable) -> Data {
+    private func redisBulkString(value: Datable) -> Data
+    {
         var buffer = "$".data
-        let data = value.data
+        let data: Data //= value.data
+        
+        switch value
+        {
+        case let dataValue as Data:
+            data = dataValue
+        case let stringValue as String:
+            data = stringValue.data
+        case let intValue as Int:
+            let stringValue = String(intValue)
+            data = stringValue.data
+        case let floatValue as Float:
+            let stringValue = String(floatValue)
+            data = stringValue.data
+        case let doubleValue as Double:
+            let stringValue = String(doubleValue)
+            data = stringValue.data
+        default:
+            data = value.data
+        }
+        
         let strLength = data.count
         buffer.append("\(strLength)".data)
         buffer.append("\r\n".data)
