@@ -264,6 +264,34 @@ final class RedShotTests: XCTestCase {
             XCTFail("Select throw an error : \(error.localizedDescription)")
         }
     }
+    
+    func testllen()
+    {
+        #if os(Linux)
+            let hostname = "redis"
+            let port = 6379
+        #else
+            let hostname = "localhost"
+            let port = 6379
+        #endif
+        
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let _ = try redis.lpush(key: "TEST_LIST", values: "A", "B", "C", "D")
+            let _ = try redis.hset(key: "TEST_HASH", field: "MY_KEY", value: "my value")
+            let llenResult = try redis.llen(key: "TEST_LIST")
+            
+            XCTAssertThrowsError(try redis.llen(key: "TEST_HASH"))
+            XCTAssertEqual(llenResult as? Int, 4)
+            
+            _ = try redis.sendCommand("del", values: ["TEST_LIST", "TEST_HASH"])
+        }
+        catch
+        {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
 
     func testhset() {
         #if os(Linux)

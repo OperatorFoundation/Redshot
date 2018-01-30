@@ -163,6 +163,16 @@ extension Redis {
     public func lpop(key: Datable) throws -> RedisType {
       return try sendCommand("LPOP", values: [key])
     }
+    
+    /// Returns the length of the list stored at key.
+    /// If key does not exist, it is interpreted as an empty list and 0 is returned.
+    ///
+    /// - Parameter key: The key.
+    /// - Returns: Integer reply: the length of the list at key.
+    /// - Throws: a RedisError. An error is returned when the value stored at key is not a list.
+    public func llen(key: Datable) throws -> RedisType {
+        return try sendCommand("LLEN", values: [key])
+    }
 
     /// The CLIENT SETNAME command assigns a name to the current connection.
     /// The assigned name is displayed in the output of CLIENT LIST
