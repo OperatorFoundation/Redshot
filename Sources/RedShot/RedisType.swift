@@ -52,7 +52,7 @@ extension TypeIdentifier: RawRepresentable {
     }
 }
 
-public protocol RedisType: CustomStringConvertible, Datable { }
+public protocol RedisType: CustomStringConvertible { }
 
 extension Int: RedisType { }
 
