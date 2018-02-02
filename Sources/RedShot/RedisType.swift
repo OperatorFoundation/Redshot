@@ -10,6 +10,7 @@
 //
 
 import Foundation
+import Datable
 
 public enum TypeIdentifier {
     public static let dollar: UInt8 = 0x24
@@ -51,7 +52,7 @@ extension TypeIdentifier: RawRepresentable {
     }
 }
 
-public protocol RedisType: CustomStringConvertible { }
+public protocol RedisType: CustomStringConvertible, Datable { }
 
 extension Int: RedisType { }
 
@@ -62,3 +63,4 @@ extension Data: RedisType { }
 extension Array: RedisType { }
 
 extension NSNull: RedisType { }
+
