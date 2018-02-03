@@ -280,4 +280,17 @@ extension Redis {
         return try sendCommand("HINCRBY", values: [hashKey, fieldKey, "\(increment)"])
     }
     
+    /// Removes the specified field from the hash stored at key.
+    /// Specified fields that do not exist within this hash are ignored.
+    /// If key does not exist, it is treated as an empty hash and this command returns 0.
+    ///
+    /// - Parameters:
+    ///   - key: The key.
+    ///   - field: The field in the hash to delete
+    /// - Returns: Integer reply: the number of fields that were removed from the hash, not including specified but non existing fields.
+    /// - Throws: a RedisError
+    public func hdel(key: Datable, field: Datable) throws -> RedisType {
+        return try sendCommand("HDEL", values: [key, field])
+    }
+    
 }

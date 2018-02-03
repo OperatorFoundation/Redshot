@@ -293,6 +293,31 @@ final class RedShotTests: XCTestCase {
         }
     }
 
+    func testhdel()
+    {
+        #if os(Linux)
+            let hostname = "redis"
+            let port = 6379
+        #else
+            let hostname = "localhost"
+            let port = 6379
+        #endif
+        
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            
+            let _ = try redis.hset(key: "TEST_HASH", field: "MY_KEY", value: "my value")
+            let hdelResult = try redis.hdel(key: "TEST_HASH", field: "MY_KEY")
+            
+            XCTAssertEqual(hdelResult as? Int, 1)
+        }
+        catch
+        {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
+    
     func testhset() {
         #if os(Linux)
             let hostname = "redis"
