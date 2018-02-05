@@ -293,4 +293,40 @@ extension Redis {
         return try sendCommand("HDEL", values: [key, field])
     }
     
+    /// Marks the start of a transaction block.
+    /// Subsequent commands will be queued for atomic execution using EXEC.
+    ///
+    /// - Parameters: None
+    /// - Returns: None
+    public func multi() throws {
+        try sendCommand("MULTI", values: [])
+    }
+    
+    /// Flushes all previously queued commands in a transaction and restores the connection state to normal.
+    /// If WATCH was used, DISCARD unwatches all keys watched by the connection.
+    ///
+    /// - Parameters: None
+    /// - Returns: None
+    public func discard() throws {
+        try sendCommand("DISCARD", values: [])
+    }
+    
+    /// Executes all previously queued commands in a transaction and restores the connection state to normal.
+    /// When using WATCH, EXEC will execute commands only if the watched keys were not modified, allowing for a check-and-set mechanism.
+    ///
+    /// - Parameters: None
+    /// - Returns: Array, each element being the reply to each of the commands in the atomic transaction.
+    ///
+    /// When using WATCH, EXEC can return a Null reply if the execution was aborted.
+    public func exec() throws -> [RedisType]? {
+        let result = try sendCommand("EXEC", values: [])
+
+        if "\(type(of: result))" == "NSNull"
+        {
+            return nil
+        }
+        
+        return result as! [RedisType]
+    }
+
 }
