@@ -11,6 +11,7 @@
 
 import XCTest
 import RedShot
+import Datable
 
 final class RedShotTests: XCTestCase {
 
@@ -42,9 +43,19 @@ final class RedShotTests: XCTestCase {
         try redis.subscribe(channel: "ZZ1", callback: { response, _ in
 
             if let resp = response as? Array<RedisType> {
-                if resp[0].description == "message" {
-                    XCTAssertEqual(resp[2].description, "hello")
-                    expectation.fulfill()
+                switch resp[0] {
+                    case let responseType as Data:
+                        if responseType == "message".data {
+                            switch resp[2] {
+                                case let payload as Data:
+                                    XCTAssertEqual(payload, "hello".data)
+                                    expectation.fulfill()
+                                default:
+                                    XCTFail("Payload was not Data")
+                            }
+                        }
+                    default:
+                        XCTFail("Type was not Data")
                 }
             }
         })
@@ -130,7 +141,7 @@ final class RedShotTests: XCTestCase {
         XCTAssertEqual(resultSet as? String, "OK")
 
         let result = try redis.get(key: "mycounter")
-        XCTAssertEqual(result as? String, "479")
+        XCTAssertEqual(result as? Data, "479".data)
 
         let unknownKey = try redis.get(key: "unknown123")
         XCTAssertNotNil(unknownKey as? NSNull)
@@ -142,7 +153,7 @@ final class RedShotTests: XCTestCase {
         XCTAssertEqual((lpush as? Int), 4)
 
         let lpopResult = try redis.lpop(key: "mylist")
-        XCTAssertEqual(lpopResult as? String, "welt")
+        XCTAssertEqual(lpopResult as? Data, "welt".data)
 
         try redis.sendCommand("DEL", values: ["myset"])
         let sadd = try redis.sadd(key: "myset", values: "world", "mundo", "monde", "welt")
@@ -277,7 +288,7 @@ final class RedShotTests: XCTestCase {
         
         do
         {
-            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let redis = try Redis(hostname: hostname, port: port, password: "password123")
             let _ = try redis.lpush(key: "TEST_LIST", values: "A", "B", "C", "D")
             let _ = try redis.hset(key: "TEST_HASH", field: "MY_KEY", value: "my value")
             let llenResult = try redis.llen(key: "TEST_LIST")
@@ -305,7 +316,7 @@ final class RedShotTests: XCTestCase {
         
         do
         {
-            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let redis = try Redis(hostname: hostname, port: port, password: "password123")
             
             let _ = try redis.hset(key: "TEST_HASH", field: "MY_KEY", value: "my value")
             let hdelResult = try redis.hdel(key: "TEST_HASH", field: "MY_KEY")
@@ -329,10 +340,16 @@ final class RedShotTests: XCTestCase {
 
         do {
             let redis = try Redis(hostname: hostname, port: port, password: "password123")
+            try redis.sendCommand("flushdb", values: [])
             let hsetResult = try redis.hset(key: "TEST_HASH", field: "MY_KEY", value: "my value")
-            XCTAssertEqual(hsetResult as? Int, 1)
+            switch hsetResult {
+                case let intResult as Int:
+                    XCTAssertEqual(intResult, 1)
+                default:
+                    XCTFail("hset result type was not int")
+            }
             let hgetResult = try redis.hget(key: "TEST_HASH", field: "MY_KEY")
-            XCTAssertEqual(hgetResult as? String, "my value")
+            XCTAssertEqual(hgetResult as? Data, "my value".data)
 
             let hgetAllResult = try redis.hgetAll(key: "TEST_HASH")
             XCTAssertEqual(hgetAllResult.count, 1)

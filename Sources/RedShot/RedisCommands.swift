@@ -247,9 +247,9 @@ extension Redis {
     /// - Parameter key: The key.
     /// - Returns: a dictionary.
     /// - Throws: a RedisError
-    public func hgetAll(key: Datable) throws -> [String: String] {
-        var dictionary: [String: String] = [:]
-        if let result = try sendCommand("HGETALL", values: [key]) as? Array<String> {
+    public func hgetAll(key: Datable) throws -> [Data: Data] {
+        var dictionary: [Data: Data] = [:]
+        if let result = try sendCommand("HGETALL", values: [key]) as? Array<Data> {
             let tuples = stride(from: 0, to: result.count, by: 2).map { num in
                 return (result[num], result[num + 1])
             }
