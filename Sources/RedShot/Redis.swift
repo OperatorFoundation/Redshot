@@ -27,6 +27,7 @@ public enum RedisError: Error {
 public class Redis {
 
     private var redisSocket: RedisSocket
+    private var mutex: DispatchSemaphore
     public static let cr: UInt8 = 0x0D
     public static let lf: UInt8 = 0x0A
     private let hostname: String
@@ -52,6 +53,7 @@ public class Redis {
         self.password = password
 
         self.redisSocket = try RedisSocket(hostname: hostname, port: port)
+        self.mutex = DispatchSemaphore(value: 1)
 
         if let password = password, !password.isEmpty {
         	let _:RedisType = try auth(password: password)
@@ -66,12 +68,14 @@ public class Redis {
             }
         }
         
+        self.mutex.wait()
         do {
             try redisSocket.send(cmd)
         } catch {
             throw error
         }
         let data = redisSocket.read()
+        self.mutex.signal()
         
         let bytes = data.withUnsafeBytes {
             [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
