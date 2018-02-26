@@ -372,7 +372,7 @@ final class RedShotTests: XCTestCase {
         do {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
             try redis.sendCommand("flushdb", values: [])
-            let maxScoreResult = try redis.zrevrangebyscoreMaxScore(setKey: "Required:TimeDifference")
+            let maxScoreResult = try redis.zrevrange(setKey: "Required:TimeDifference")
             switch maxScoreResult {
             case let intResult as Int:
                 XCTAssertEqual(intResult, 1)
