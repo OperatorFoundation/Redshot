@@ -358,5 +358,36 @@ final class RedShotTests: XCTestCase {
             XCTFail("Select throw an error : \(error.localizedDescription)")
         }
     }
+    
+    func testsetMaxScore()
+    {
+        #if os(Linux)
+            let hostname = "redis"
+            let port = 6379
+        #else
+            let hostname = "localhost"
+            let port = 6379
+        #endif
+        
+        do {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            try redis.sendCommand("flushdb", values: [])
+            let maxScoreResult = try redis.zrevrangebyscoreMaxScore(setKey: "Required:TimeDifference")
+            switch maxScoreResult {
+            case let intResult as Int:
+                XCTAssertEqual(intResult, 1)
+            default:
+                XCTFail("hset result type was not int")
+            }
+            let hgetResult = try redis.hget(key: "TEST_HASH", field: "MY_KEY")
+            XCTAssertEqual(hgetResult as? Data, "my value".data)
+            
+            let hgetAllResult = try redis.hgetAll(key: "TEST_HASH")
+            XCTAssertEqual(hgetAllResult.count, 1)
+            
+        } catch {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
 
 }
