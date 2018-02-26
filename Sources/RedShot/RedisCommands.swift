@@ -131,6 +131,17 @@ extension Redis {
     public func zincrby(setKey: Datable, increment: Double, fieldKey: Datable) throws -> RedisType {
         return try sendCommand("ZINCRBY", values: [setKey, "\(increment)", fieldKey])
     }
+
+    public func zrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType {
+        //ZRANGE setKey minIndex maxIndex
+        //ZRANGE setKey minIndex maxIndex WITHSCORES
+        
+        if withScores {
+            return try sendCommand("ZRANGE", values: [setKey, minIndex, maxIndex, "WITHSCORES"])
+        } else {
+            return try sendCommand("ZRANGE", values: [setKey, minIndex, maxIndex])
+        }
+    }
     
     public func zrevrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType {
         //ZREVRANGEBYSCORE setKey minIndex maxIndex
