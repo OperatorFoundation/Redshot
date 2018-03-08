@@ -14,6 +14,7 @@ import Dispatch
 import Datable
 
 let star = "*".data
+let dollar = "$".data
 let rn = "\r\n".data
 
 public enum RedisError: Error {
@@ -76,10 +77,10 @@ public class Redis {
             try redisSocket.send(star)
             try redisSocket.send("\(values.count + 1)".data)
             try redisSocket.send(rn)
-            try redisSocket.send(redisBulkString(value: cmd))
+            try sendRedisBulkString(cmd)
             
             for value in values {
-                try redisSocket.send(redisBulkString(value: value))
+                try sendRedisBulkString(value)
             }
             
             let maybeData = redisSocket.read()
@@ -104,37 +105,39 @@ public class Redis {
         }
     }
     
-    private func redisBulkString(value: Datable) -> Data
-    {
-        var buffer = "$".data
-        let data: Data //= value.data
-        
-        switch value
-        {
-        case let dataValue as Data:
-            data = dataValue
-        case let stringValue as String:
-            data = stringValue.data
-        case let intValue as Int:
-            let stringValue = String(intValue)
-            data = stringValue.data
-        case let floatValue as Float:
-            let stringValue = String(floatValue)
-            data = stringValue.data
-        case let doubleValue as Double:
-            let stringValue = String(doubleValue)
-            data = stringValue.data
-        default:
-            data = value.data
+    private func sendRedisBulkString(_ value: Datable) throws {
+        do {
+            try redisSocket.send(dollar)
+            
+            let data: Data //= value.data
+            
+            switch value
+            {
+                case let dataValue as Data:
+                    data = dataValue
+                case let stringValue as String:
+                    data = stringValue.data
+                case let intValue as Int:
+                    let stringValue = String(intValue)
+                    data = stringValue.data
+                case let floatValue as Float:
+                    let stringValue = String(floatValue)
+                    data = stringValue.data
+                case let doubleValue as Double:
+                    let stringValue = String(doubleValue)
+                    data = stringValue.data
+                default:
+                    data = value.data
+            }
+            
+            let strLength = data.count
+            try redisSocket.send("\(strLength)".data)
+            try redisSocket.send(rn)
+            try redisSocket.send(data)
+            try redisSocket.send(rn)
+        } catch {
+            throw error
         }
-        
-        let strLength = data.count
-        buffer.append("\(strLength)".data)
-        buffer.append("\r\n".data)
-        buffer.append(data)
-        buffer.append("\r\n".data)
-        
-        return buffer
     }
     
     /// Subscribes the client to the specified channel.
