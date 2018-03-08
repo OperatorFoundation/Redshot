@@ -13,19 +13,21 @@ import Foundation
 import Dispatch
 import Datable
 
-public enum RedisError: Error {
+let star = "*".data
+let rn = "\r\n".data
 
+public enum RedisError: Error {
     case connection(String)
     case response(String)
     case parseResponse
     case typeUnknown
     case emptyResponse
     case noAuthorized
+    case failedRead
 }
 
 /// Redis Client
 public class Redis {
-
     private var redisSocket: RedisSocket
     private var mutex: DispatchSemaphore
     public static let cr: UInt8 = 0x0D
@@ -59,43 +61,47 @@ public class Redis {
         	let _:RedisType = try auth(password: password)
         }
     }
-
-    private func processCmd(_ cmd: Data) throws -> RedisType {
-        if !self.isConnected {
-            redisSocket = try RedisSocket(hostname: self.hostname, port: self.port)
-            if let password = password {
-                let _: Bool = try self.auth(password: password)
-            }
-        }
-        
-        self.mutex.wait()
-        do {
-            try redisSocket.send(cmd)
-        } catch {
-            throw error
-        }
-        let data = redisSocket.read()
-        self.mutex.signal()
-        
-        let bytes = data.withUnsafeBytes {
-            [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
-        }
-        
-        let parser = Parser(bytes: bytes)
-        return try parser.parse()
-    }
     
     @discardableResult public func sendCommand(_ cmd: String, values: [Datable]) throws -> RedisType {
-        var command = "*".data
-        command.append("\(values.count + 1)".data)
-        command.append("\r\n".data)
-        command.append(redisBulkString(value: cmd))
+        self.mutex.wait()
         
-        for value in values {
-            command.append(redisBulkString(value: value))
+        do {
+            if !self.isConnected {
+                redisSocket = try RedisSocket(hostname: self.hostname, port: self.port)
+                if let password = password {
+                    let _: Bool = try self.auth(password: password)
+                }
+            }
+            
+            try redisSocket.send(star)
+            try redisSocket.send("\(values.count + 1)".data)
+            try redisSocket.send(rn)
+            try redisSocket.send(redisBulkString(value: cmd))
+            
+            for value in values {
+                try redisSocket.send(redisBulkString(value: value))
+            }
+            
+            let maybeData = redisSocket.read()
+            guard let data = maybeData else {
+                mutex.signal()
+                throw RedisError.failedRead
+            }
+            
+            let bytes = data.withUnsafeBytes {
+                [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
+            }
+            
+            let parser = Parser(bytes: bytes)
+            let result = try parser.parse()
+            
+            self.mutex.signal()
+            
+            return result
+        } catch {
+            mutex.signal()
+            throw error
         }
-        
-        return try processCmd(command)
     }
     
     private func redisBulkString(value: Datable) -> Data
@@ -142,11 +148,16 @@ public class Redis {
 
         if let password = self.password {
             do {
-                try subscribeSocket.send("AUTH \(password)\r\n")
+                try subscribeSocket.send("AUTH \(password)\r\n".data)
             } catch {
                 throw error
             }
-            let data = subscribeSocket.read()
+            
+            let maybeData = subscribeSocket.read()
+            guard let data = maybeData else {
+                throw RedisError.noAuthorized
+            }
+            
             let bytes = data.withUnsafeBytes {
                 [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
             }
@@ -162,11 +173,13 @@ public class Redis {
 
         DispatchQueue.global(qos: .userInitiated).async {
             do {
-                try subscribeSocket.send("SUBSCRIBE \(channel)\r\n")
+                try subscribeSocket.send("SUBSCRIBE \(channel)\r\n".data)
                 
                 while subscribeSocket.isConnected {
-                    
-                    let data = subscribeSocket.read()
+                    let maybeData = subscribeSocket.read()
+                    guard let data = maybeData else {
+                        throw RedisError.noAuthorized
+                    }
                     
                     let bytes = data.withUnsafeBytes {
                         [UInt8](UnsafeBufferPointer(start: $0, count: data.count))

@@ -370,14 +370,14 @@ final class RedShotTests: XCTestCase {
         #endif
         
         do {
-            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let redis = try Redis(hostname: hostname, port: port, password: "password123")
             try redis.sendCommand("flushdb", values: [])
             let maxScoreResult = try redis.zrevrange(setKey: "Required:TimeDifference")
             switch maxScoreResult {
-            case let intResult as Int:
-                XCTAssertEqual(intResult, 1)
-            default:
-                XCTFail("hset result type was not int")
+                case let intResult as Int:
+                    XCTAssertEqual(intResult, 1)
+                default:
+                    XCTFail("hset result type was not int")
             }
             let hgetResult = try redis.hget(key: "TEST_HASH", field: "MY_KEY")
             XCTAssertEqual(hgetResult as? Data, "my value".data)
