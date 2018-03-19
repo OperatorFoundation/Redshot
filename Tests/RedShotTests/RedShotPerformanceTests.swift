@@ -29,7 +29,7 @@ class RedShotPerformanceTests: XCTestCase {
             do {
                 let hostname = "localhost"
                 let port = 6379
-                let redis = try Redis(hostname: hostname, port: port, password: "password123")
+                let redis = try Redis(hostname: hostname, port: port, password: nil)
 
                 var errorCount = 0
                 for index in 1...10_000 {
@@ -53,7 +53,7 @@ class RedShotPerformanceTests: XCTestCase {
             do {
                 let hostname = "localhost"
                 let port = 6379
-                let redis = try Redis(hostname: hostname, port: port, password: "password123")
+                let redis = try Redis(hostname: hostname, port: port, password: nil)
                 for index in 1...10_000 {
 
                     do {
