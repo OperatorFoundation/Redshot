@@ -129,7 +129,11 @@ extension Redis {
     /// - Throws: a RedisError.
     
     public func zincrby(setKey: Datable, increment: Double, fieldKey: Datable) throws -> RedisType {
-        return try sendCommand(ZINCRBY, values: [setKey, "\(increment)", fieldKey])
+        if increment == 1 {
+            return try sendCommand(ZINCRBY, values: [setKey, one, fieldKey])
+        } else {
+            return try sendCommand(ZINCRBY, values: [setKey, "\(increment)", fieldKey])
+        }
     }
 
     public func zrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType {

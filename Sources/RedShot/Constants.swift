@@ -23,3 +23,4 @@ let LPOP = "LPOP".data
 let LLEN = "LLEN".data
 let HSET = "HSET".data
 let HGET = "HGET".data
+let one = "1".data

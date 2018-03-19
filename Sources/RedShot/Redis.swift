@@ -85,7 +85,8 @@ public class Redis {
                 throw RedisError.failedRead
             }
             
-            let bytes = data.withUnsafeBytes {
+            let copyData = Data(data)
+            let bytes = copyData.withUnsafeBytes {
                 [UInt8](UnsafeBufferPointer(start: $0, count: data.count))
             }
             
