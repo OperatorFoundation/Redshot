@@ -13,10 +13,6 @@ import Foundation
 import Dispatch
 import Datable
 
-let star = "*".data
-let dollar = "$".data
-let rn = "\r\n".data
-
 public enum RedisError: Error {
     case connection(String)
     case response(String)
@@ -63,7 +59,7 @@ public class Redis {
         }
     }
     
-    @discardableResult public func sendCommand(_ cmd: String, values: [Datable]) throws -> RedisType {
+    @discardableResult public func sendCommand(_ cmd: Datable, values: [Datable]) throws -> RedisType {
         self.mutex.wait()
         
         do {

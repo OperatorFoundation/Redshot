@@ -101,7 +101,7 @@ extension Redis {
     public func sadd(key: Datable, values: Datable...) throws -> RedisType {
         var vals = [key]
         vals.append(contentsOf: values)
-        return try sendCommand("SADD", values: vals)
+        return try sendCommand(SADD, values: vals)
     }
 
     /// Returns all the members of the set value stored at key.
@@ -110,7 +110,7 @@ extension Redis {
     /// - Returns: Array reply - all elements of the set.
     /// - Throws: a RedisError.
     public func smbembers(key: Datable) throws -> RedisType {
-      return try sendCommand("SMEMBERS", values: [key])
+      return try sendCommand(SMEMBERS, values: [key])
     }
     
     //MARK: Sorted Sets
@@ -129,7 +129,7 @@ extension Redis {
     /// - Throws: a RedisError.
     
     public func zincrby(setKey: Datable, increment: Double, fieldKey: Datable) throws -> RedisType {
-        return try sendCommand("ZINCRBY", values: [setKey, "\(increment)", fieldKey])
+        return try sendCommand(ZINCRBY, values: [setKey, "\(increment)", fieldKey])
     }
 
     public func zrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType {
@@ -137,9 +137,9 @@ extension Redis {
         //ZRANGE setKey minIndex maxIndex WITHSCORES
         
         if withScores {
-            return try sendCommand("ZRANGE", values: [setKey, minIndex, maxIndex, "WITHSCORES"])
+            return try sendCommand(ZRANGE, values: [setKey, minIndex, maxIndex, WITHSCORES])
         } else {
-            return try sendCommand("ZRANGE", values: [setKey, minIndex, maxIndex])
+            return try sendCommand(ZRANGE, values: [setKey, minIndex, maxIndex])
         }
     }
     
@@ -148,9 +148,9 @@ extension Redis {
         //ZREVRANGEBYSCORE setKey minIndex maxIndex WITHSCORES
         
         if withScores {
-            return try sendCommand("ZREVRANGE", values: [setKey, minIndex, maxIndex, "WITHSCORES"])
+            return try sendCommand(ZREVRANGE, values: [setKey, minIndex, maxIndex, WITHSCORES])
         } else {
-            return try sendCommand("ZREVRANGE", values: [setKey, minIndex, maxIndex])
+            return try sendCommand(ZREVRANGE, values: [setKey, minIndex, maxIndex])
         }
     }
     
@@ -174,7 +174,7 @@ extension Redis {
     public func lpush(key: Datable, values: Datable...) throws -> RedisType {
         var vals = [key]
         vals.append(contentsOf: values)
-        return try sendCommand("LPUSH", values: vals)
+        return try sendCommand(LPUSH, values: vals)
     }
 
     /// Removes and returns the first element of the list stored at key.
@@ -183,7 +183,7 @@ extension Redis {
     /// - Returns: Bulk string reply - the value of the first element, or nil when key does not exist.
     /// - Throws: a RedisError.
     public func lpop(key: Datable) throws -> RedisType {
-      return try sendCommand("LPOP", values: [key])
+      return try sendCommand(LPOP, values: [key])
     }
     
     /// Returns the length of the list stored at key.
@@ -193,7 +193,7 @@ extension Redis {
     /// - Returns: Integer reply: the length of the list at key.
     /// - Throws: a RedisError. An error is returned when the value stored at key is not a list.
     public func llen(key: Datable) throws -> RedisType {
-        return try sendCommand("LLEN", values: [key])
+        return try sendCommand(LLEN, values: [key])
     }
 
     /// The CLIENT SETNAME command assigns a name to the current connection.
@@ -249,7 +249,7 @@ extension Redis {
     ///            0 if field already exists in the hash and the value was updated.
     /// - Throws:  a RedisError
     public func hset(key: Datable, field: Datable, value: Datable) throws -> RedisType {
-        return try sendCommand("HSET", values: [key, field, value])
+        return try sendCommand(HSET, values: [key, field, value])
     }
 
     /// Returns the value associated with `field` in the hash stored at `key`.
@@ -261,7 +261,7 @@ extension Redis {
     ///            or key does not exist.
     /// - Throws: a RedisError
     public func hget(key: Datable, field: Datable) throws -> RedisType {
-        return try sendCommand("HGET", values: [key, field])
+        return try sendCommand(HGET, values: [key, field])
     }
 
     /// Returns all fields and values of the hash stored at key.
