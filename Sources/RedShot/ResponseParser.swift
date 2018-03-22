@@ -57,14 +57,19 @@ class Parser {
             }
 
             index += 2
-
+            
             buffer.removeAll(keepingCapacity: true)
-            while index < bytes.count, bytes[index] != Redis.cr {
+            while index < bytes.count && buffer.count < bulkSize {
                 buffer.append(bytes[index])
                 index += 1
             }
 
             index += 2
+            
+            guard buffer.count == bulkSize else {
+                NSLog("Error, short read on bulk string response \(buffer)")
+                return Data()
+            }
             
             return Data(bytes: buffer)
             

@@ -390,4 +390,26 @@ final class RedShotTests: XCTestCase {
         }
     }
 
+    func testBulkStringParsing()
+    {
+        #if os(Linux)
+            let hostname = "redis"
+            let port = 6379
+        #else
+            let hostname = "localhost"
+            let port = 6379
+        #endif
+        
+        let testValue="a\nb".data
+        
+        do {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            try redis.set(key: "testBulkString", value: testValue, exist: nil, expire: nil)
+            let result = try redis.get(key: "testBulkString")
+            XCTAssertEqual(result as! Data, testValue)
+        } catch {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
+    
 }
