@@ -14,9 +14,11 @@ let dollar = "$".data
 
 let SADD = "SADD".data
 let SMEMBERS = "SMEMBERS".data
+let ZADD = "ZADD".data
 let ZINCRBY = "ZINCRBY".data
 let ZRANGE = "ZRANGE".data
 let ZREVRANGE = "ZREVRANGE".data
+let ZUNIONSTORE = "ZUNIONSTORE".data
 let WITHSCORES = "WITHSCORES".data
 let LPUSH = "LPUSH".data
 let LPOP = "LPOP".data

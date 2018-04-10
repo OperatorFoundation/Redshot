@@ -303,6 +303,63 @@ final class RedShotTests: XCTestCase {
             XCTFail("Select throw an error : \(error.localizedDescription)")
         }
     }
+    
+    func testZadd()
+    {
+        #if os(Linux)
+        let hostname = "redis"
+        let port = 6379
+        #else
+        let hostname = "localhost"
+        let port = 6379
+        #endif
+        
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let testZaddKey = "TestZaddKey"
+            let testList: Array<Datable> = ["cats", "and", "dogs", "together?!??"]
+            let zaddResult = try redis.zadd(key: testZaddKey, elements: testList)
+            
+            XCTAssertEqual(zaddResult as? Int, testList.count)
+            
+            _ = try redis.sendCommand("del", values: [testZaddKey])
+        }
+        catch
+        {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
+    
+    func testZunionstore()
+    {
+        #if os(Linux)
+        let hostname = "redis"
+        let port = 6379
+        #else
+        let hostname = "localhost"
+        let port = 6379
+        #endif
+        
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let testRSortedSet1Key = "testRSortedSet1"
+            let testRSortedSet2Key = "testRSortedSet2"
+            let goldenUnionKey = "testGoldenUnionSortedSet"
+            let newSetKey = "testNewSetFromUnion"
+            let _ = try redis.zadd(key: testRSortedSet1Key, elements: ["cats", "and", "dogs", "together?!??"])
+            let _ = try redis.zadd(key: testRSortedSet2Key, elements: ["cats", "are", "never", "dogs"])
+            let goldenUnionResult = try redis.zadd(key: goldenUnionKey, elements: ["cats", "are", "dogs", "and", "never", "together?!??"])
+            let newSetResult = try? redis.zunionstore(newSetKey: newSetKey, firstSetKey: testRSortedSet1Key, secondSetKey: testRSortedSet2Key, firstWeight: 0.5, secondWeight: 2.0)
+            XCTAssertEqual(goldenUnionResult as? Int, newSetResult as? Int)
+            _ = try redis.sendCommand("del", values: ["TEST_LIST", "TEST_HASH"])
+        }
+        catch
+        {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
 
     func testhdel()
     {
@@ -404,7 +461,7 @@ final class RedShotTests: XCTestCase {
         
         do {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
-            try redis.set(key: "testBulkString", value: testValue, exist: nil, expire: nil)
+            try _ = redis.set(key: "testBulkString", value: testValue, exist: nil, expire: nil)
             let result = try redis.get(key: "testBulkString")
             XCTAssertEqual(result as! Data, testValue)
         } catch {

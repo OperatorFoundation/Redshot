@@ -115,6 +115,20 @@ extension Redis {
     
     //MARK: Sorted Sets
     
+    /// Adds all the specified members with scores of 0 to the sorted set stored at key.
+    public func zadd(key: Datable, elements: [Datable]) throws -> RedisType
+    {
+        var values = [key]
+        for element in elements
+        {
+            values.append(0.string)
+            values.append(String(describing: element))
+        }
+        
+        return try sendCommand(ZADD, values: values)
+    }
+    
+    
     /// Increments the score of member in the sorted set stored at key by increment.
     /// If member does not exist in the sorted set, it is added with increment as its score (as if its previous score was 0.0).
     /// If key does not exist, a new sorted set with the specified member as its sole member is created.
@@ -156,6 +170,12 @@ extension Redis {
         } else {
             return try sendCommand(ZREVRANGE, values: [setKey, minIndex, maxIndex])
         }
+    }
+    
+    /// This implementation of ZUNIONSTORE is for 2 sorted sets exactly
+    public func zunionstore(newSetKey: String, firstSetKey: String, secondSetKey: String, firstWeight: Double, secondWeight: Double) throws -> RedisType
+    {
+        return try sendCommand(ZUNIONSTORE, values: [newSetKey, "2", firstSetKey, secondSetKey, "weights", firstWeight.string, secondWeight.string])
     }
     
     //MARK: Lists
@@ -352,7 +372,7 @@ extension Redis {
             return nil
         }
         
-        return result as! [RedisType]
+        return (result as! [RedisType])
     }
 
 }
