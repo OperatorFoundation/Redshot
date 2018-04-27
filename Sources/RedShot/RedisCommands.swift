@@ -172,7 +172,7 @@ extension Redis {
         }
     }
     
-    public func zrangebyscore(setKey: Datable, minScore:Int, maxScore:Int, withScores:Bool = false) throws -> RedisType
+    public func zrangebyscore(setKey: Datable, minScore: Double, maxScore: Double, withScores:Bool = false) throws -> RedisType
     {
         if withScores
         {
