@@ -331,6 +331,33 @@ final class RedShotTests: XCTestCase {
         }
     }
     
+    func testZrangebyscore()
+    {
+        #if os(Linux)
+        let hostname = "redis"
+        let port = 6379
+        #else
+        let hostname = "localhost"
+        let port = 6379
+        #endif
+        
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let testRSortedSetKey = "testRSortedSet1"
+            let setElements = [5, 10, 15]
+            let _ = try redis.zadd(key: testRSortedSetKey, elements: setElements)
+            let rangeByScoreResult = try redis.zrangebyscore(setKey: testRSortedSetKey, minScore: 0, maxScore: 0)
+            let resultArray = rangeByScoreResult as? Array<RedisType>
+            XCTAssertEqual(resultArray!.count, setElements.count)
+            _ = try redis.sendCommand("del", values: [testRSortedSetKey])
+        }
+        catch
+        {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
+    
     func testZunionstore()
     {
         #if os(Linux)
@@ -353,7 +380,7 @@ final class RedShotTests: XCTestCase {
             let goldenUnionResult = try redis.zadd(key: goldenUnionKey, elements: ["cats", "are", "dogs", "and", "never", "together?!??"])
             let newSetResult = try? redis.zunionstore(newSetKey: newSetKey, firstSetKey: testRSortedSet1Key, secondSetKey: testRSortedSet2Key, firstWeight: 0.5, secondWeight: 2.0)
             XCTAssertEqual(goldenUnionResult as? Int, newSetResult as? Int)
-            _ = try redis.sendCommand("del", values: ["TEST_LIST", "TEST_HASH"])
+            _ = try redis.sendCommand("del", values: [testRSortedSet1Key, testRSortedSet2Key, goldenUnionKey, newSetKey])
         }
         catch
         {

@@ -18,6 +18,7 @@ let ZADD = "ZADD".data
 let ZINCRBY = "ZINCRBY".data
 let ZRANGE = "ZRANGE".data
 let ZREVRANGE = "ZREVRANGE".data
+let ZRANGEBYSCORE = "ZRANGEBYSCORE".data
 let ZUNIONSTORE = "ZUNIONSTORE".data
 let WITHSCORES = "WITHSCORES".data
 let LPUSH = "LPUSH".data

@@ -172,6 +172,18 @@ extension Redis {
         }
     }
     
+    public func zrangebyscore(setKey: Datable, minScore:Int, maxScore:Int, withScores:Bool = false) throws -> RedisType
+    {
+        if withScores
+        {
+            return try sendCommand(ZRANGEBYSCORE, values: [setKey, minScore, maxScore, WITHSCORES])
+        }
+        else
+        {
+            return try sendCommand(ZRANGEBYSCORE, values: [setKey, minScore, maxScore])
+        }
+    }
+    
     /// This implementation of ZUNIONSTORE is for 2 sorted sets exactly
     public func zunionstore(newSetKey: String, firstSetKey: String, secondSetKey: String, firstWeight: Double, secondWeight: Double) throws -> RedisType
     {
