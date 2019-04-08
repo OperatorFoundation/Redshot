@@ -12,7 +12,27 @@
 import Foundation
 import Datable
 
-extension Redis {
+extension Redis
+{
+    
+    public func configSet(key: String, value: Datable) throws -> Bool
+    {
+        do {
+            let response: RedisType = try sendCommand("config", values: ["set", key, value])
+            guard let resp = response as? String else {
+                return false
+            }
+            
+            return resp == "OK"
+        } catch RedisError.response {
+            return false
+        }
+    }
+    
+    public func configGet(key: String) throws -> RedisType
+    {
+        return try sendCommand("config", values: ["get", key])
+    }
 
     /// Request for authentication in a password-protected Redis server.
     ///
