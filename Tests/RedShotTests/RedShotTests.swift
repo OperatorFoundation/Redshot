@@ -13,7 +13,8 @@ import XCTest
 import RedShot
 import Datable
 
-final class RedShotTests: XCTestCase {
+final class RedShotTests: XCTestCase
+{
 
     static var allTests = [
         ("testComplexString", testComplexString),
@@ -27,7 +28,8 @@ final class RedShotTests: XCTestCase {
         ("testhset", testhset)
     ]
 
-    func testSubscribe() throws {
+    func testSubscribe() throws
+    {
         #if os(Linux)
             let hostname = "redis"
             let port = 6379
@@ -492,6 +494,24 @@ final class RedShotTests: XCTestCase {
             let result = try redis.get(key: "testBulkString")
             XCTAssertEqual(result as! Data, testValue)
         } catch {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
+    
+    func testShutdown()
+    {
+        let hostname = "localhost"
+        let port = 6379
+        
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let result = try redis.shutdown()
+            XCTAssertTrue(result)
+        }
+        catch let error
+        {
+            print("\nShutdown error")
             XCTFail("Select throw an error : \(error.localizedDescription)")
         }
     }

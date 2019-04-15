@@ -15,6 +15,22 @@ import Datable
 extension Redis
 {
     
+    public func shutdown() -> Bool
+    {
+        do
+        {
+            // If we get any response at all then the shutdown failed
+            
+            let _ = try sendCommand("SHUTDOWN", values: ["SAVE"])
+            return false
+        }
+        catch
+        {
+            return true
+        }
+        
+    }
+    
     public func configSet(key: String, value: Datable) throws -> Bool
     {
         do {
