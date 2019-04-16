@@ -49,6 +49,21 @@ extension Redis
     {
         return try sendCommand("config", values: ["get", key])
     }
+    
+    public func configRewrite() throws -> Bool
+    {
+        do
+        {
+            let response: RedisType = try sendCommand("config", values: ["rewrite"])
+            guard let resp = response as? String
+                else { return false }
+            return resp == "OK"
+        }
+        catch RedisError.response
+        {
+            return false
+        }
+    }
 
     /// Request for authentication in a password-protected Redis server.
     ///
