@@ -15,6 +15,13 @@ import Datable
 
 final class RedShotTests: XCTestCase
 {
+    #if os(Linux)
+    let hostname = "redis"
+    let port = 6379
+    #else
+    let hostname = "localhost"
+    let port = 6379
+    #endif
 
     static var allTests = [
         ("testComplexString", testComplexString),
@@ -30,14 +37,6 @@ final class RedShotTests: XCTestCase
 
     func testSubscribe() throws
     {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-
         let redis = try Redis(hostname: hostname, port: port, password: nil)
 
         let expectation = self.expectation(description: "Subscribe")
@@ -68,16 +67,10 @@ final class RedShotTests: XCTestCase
         self.waitForExpectations(timeout: 10, handler: nil)
     }
 
-    func testUnsubscribe() {
-        do {
-            #if os(Linux)
-                let hostname = "redis"
-                let port = 6379
-            #else
-                let hostname = "localhost"
-                let port = 6379
-            #endif
-
+    func testUnsubscribe()
+    {
+        do
+        {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
 
             try redis.subscribe(channel: "ZX81", callback: { _, _ in
@@ -99,16 +92,8 @@ final class RedShotTests: XCTestCase
 
     }
 
-    func testPush() throws {
-
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-
+    func testPush() throws
+    {
         let redis = try Redis(hostname: hostname, port: port)
 //        let authResp: Bool = try redis.auth(password: nil)
 //        XCTAssertTrue(authResp)
@@ -121,16 +106,8 @@ final class RedShotTests: XCTestCase
         redis.close()
     }
 
-    func testCommand() throws {
-
-        #if os(Linux)
-        let hostname = "redis"
-        let port = 6379
-        #else
-        let hostname = "localhost"
-        let port = 6379
-        #endif
-
+    func testCommand() throws
+    {
         let redis = try Redis(hostname: hostname, port: port)
 
 //        let failedAuth: Bool = try redis.auth(password: "hello")
@@ -177,15 +154,8 @@ final class RedShotTests: XCTestCase
     }
 
     func testComplexString() {
-        do {
-            #if os(Linux)
-                let hostname = "redis"
-                let port = 6379
-            #else
-                let hostname = "localhost"
-                let port = 6379
-            #endif
-
+        do
+        {
             let message = "18:28:13.036 VERBOSE Extensions.init():14 - Request: Request(method: \"GET\", " +
             "path: \"/health\", body: \"\", headers: [(name: \"User-Agent\", " +
             "value: \"Paw/3.1.1 (Macintosh; OS X/10.12.5) GCDHTTPRequest\"), " +
@@ -203,15 +173,8 @@ final class RedShotTests: XCTestCase
         }
     }
 
-    func testInitWithPassword() {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-
+    func testInitWithPassword()
+    {
         XCTAssertThrowsError(try Redis(hostname: hostname, port: port, password: "Hello"))
         XCTAssertNoThrow(try Redis(hostname: hostname, port: port, password: ""))
 
@@ -224,15 +187,8 @@ final class RedShotTests: XCTestCase
         }
     }
 
-    func testClientSetName() {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-
+    func testClientSetName()
+    {
         do {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
             let setName = try redis.clientSetName(clientName: "REDSHOT")
@@ -243,14 +199,6 @@ final class RedShotTests: XCTestCase
     }
 
     func testIncrement() {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-
         do {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
             let incrResult = try redis.incr(key: "INCR_KEY")
@@ -261,14 +209,6 @@ final class RedShotTests: XCTestCase
     }
 
     func testSelect() {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-
         do {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
             let selectResult = try redis.select(databaseIndex: 3)
@@ -280,14 +220,6 @@ final class RedShotTests: XCTestCase
     
     func testllen()
     {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-        
         do
         {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
@@ -308,14 +240,6 @@ final class RedShotTests: XCTestCase
     
     func testZadd()
     {
-        #if os(Linux)
-        let hostname = "redis"
-        let port = 6379
-        #else
-        let hostname = "localhost"
-        let port = 6379
-        #endif
-        
         do
         {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
@@ -333,16 +257,46 @@ final class RedShotTests: XCTestCase
         }
     }
     
+    func testZpopmax()
+    {
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let testRSortedSetKey = "testRSortedSet1"
+            let setElements = [5, 10, 15, 20, 25, 30, 35, 40]
+            let _ = try redis.zadd(key: testRSortedSetKey, elements: setElements)
+            let zpopmaxResult = try redis.zpopmax(key: testRSortedSetKey, count: 3)
+            let resultArray = zpopmaxResult as? Array<RedisType>
+            XCTAssertEqual(resultArray!.count, 6)
+            _ = try redis.sendCommand("del", values: [testRSortedSetKey])
+        }
+        catch
+        {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
+    
+    func testZpopmin()
+    {
+        do
+        {
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let testRSortedSetKey = "testRSortedSet1"
+            let setElements = [5, 10, 15, 20, 25, 30, 35, 40]
+            let _ = try redis.zadd(key: testRSortedSetKey, elements: setElements)
+            let zpopmaxResult = try redis.zpopmin(key: testRSortedSetKey, count: 3)
+            let resultArray = zpopmaxResult as? Array<RedisType>
+            XCTAssertEqual(resultArray!.count, 6)
+            _ = try redis.sendCommand("del", values: [testRSortedSetKey])
+        }
+        catch
+        {
+            XCTFail("Select throw an error : \(error.localizedDescription)")
+        }
+    }
+    
     func testZrangebyscore()
     {
-        #if os(Linux)
-        let hostname = "redis"
-        let port = 6379
-        #else
-        let hostname = "localhost"
-        let port = 6379
-        #endif
-        
         do
         {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
@@ -362,14 +316,6 @@ final class RedShotTests: XCTestCase
     
     func testZunionstore()
     {
-        #if os(Linux)
-        let hostname = "redis"
-        let port = 6379
-        #else
-        let hostname = "localhost"
-        let port = 6379
-        #endif
-        
         do
         {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
@@ -392,14 +338,6 @@ final class RedShotTests: XCTestCase
 
     func testhdel()
     {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-        
         do
         {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
@@ -416,14 +354,6 @@ final class RedShotTests: XCTestCase
     }
     
     func testhset() {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-
         do {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
             try redis.sendCommand("flushdb", values: [])
@@ -447,14 +377,6 @@ final class RedShotTests: XCTestCase
     
     func testsetMaxScore()
     {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-        
         do {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
             try redis.sendCommand("flushdb", values: [])
@@ -478,14 +400,6 @@ final class RedShotTests: XCTestCase
 
     func testBulkStringParsing()
     {
-        #if os(Linux)
-            let hostname = "redis"
-            let port = 6379
-        #else
-            let hostname = "localhost"
-            let port = 6379
-        #endif
-        
         let testValue="a\nb".data
         
         do {
@@ -500,9 +414,6 @@ final class RedShotTests: XCTestCase
     
     func testShutdown()
     {
-        let hostname = "localhost"
-        let port = 6379
-        
         do
         {
             let redis = try Redis(hostname: hostname, port: port, password: nil)

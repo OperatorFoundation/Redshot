@@ -179,6 +179,45 @@ extension Redis
         return try sendCommand(ZADD, values: values)
     }
     
+    /**
+    Removes and returns up to count members with the lowest scores in the sorted set stored at key.
+     
+     - Parameters:
+        - key: key for the sorted set
+        - count: number of elements to remove from the sorted set and return to the requestor. When left unspecified, the default value for count is 1. Specifying a count value that is higher than the sorted set's cardinality will not produce an error.
+     - Returns: RedisType that should translate to an Array reply: list of popped elements and scores [value, score, value, score, etc.] sorted lowest to highest. When returning multiple elements, the one with the lowest score will be the first, followed by the elements with greater scores.
+    */
+    public func zpopmin(key: Datable, count: Int?) throws -> RedisType
+    {
+        if let numberToPop = count
+        {
+            return try sendCommand(ZPOPMIN, values: [key, "\(numberToPop)"])
+        }
+        else
+        {
+            return try sendCommand(ZPOPMIN, values: [key])
+        }
+    }
+    
+    /**
+     Removes and returns up to count members with the highest scores in the sorted set stored at key.
+     
+     - Parameters:
+     - key: key for the sorted set
+     - count: number of elements to remove from the sorted set and return to the requestor. When left unspecified, the default value for count is 1. Specifying a count value that is higher than the sorted set's cardinality will not produce an error.
+     - Returns: RedisType that should translate to an Array reply: list of popped elements and scores [value, score, value, score, etc.]. When returning multiple elements, the one with the highest score will be the first, followed by the elements with lower scores.
+     */
+    public func zpopmax(key: Datable, count: Int?) throws -> RedisType
+    {
+        if let numberToPop = count
+        {
+            return try sendCommand(ZPOPMAX, values: [key, "\(numberToPop)"])
+        }
+        else
+        {
+            return try sendCommand(ZPOPMAX, values: [key])
+        }
+    }
     
     /// Increments the score of member in the sorted set stored at key by increment.
     /// If member does not exist in the sorted set, it is added with increment as its score (as if its previous score was 0.0).
