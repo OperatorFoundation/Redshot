@@ -321,6 +321,18 @@ extension Redis
     public func llen(key: Datable) throws -> RedisType {
         return try sendCommand(LLEN, values: [key])
     }
+    
+    /// Returns the length of the list stored at key.
+    /// If key does not exist, it is interpreted as an empty list and 0 is returned.
+    ///
+    /// - Parameter key: The key.
+    /// - Parameter start: The stop index.
+    /// - Parameter stop: The start index.
+    /// - Returns: Array reply: list of elements in the specified range.
+    /// - Throws: a RedisError. An error is returned when the value stored at key is not a list.
+    public func lrange(key: Datable, start: Int, stop: Int) throws -> RedisType {
+        return try sendCommand(LRANGE, values: [key, start, stop])
+    }
 
     /// The CLIENT SETNAME command assigns a name to the current connection.
     /// The assigned name is displayed in the output of CLIENT LIST

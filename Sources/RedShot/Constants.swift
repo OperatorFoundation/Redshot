@@ -26,6 +26,7 @@ let WITHSCORES = "WITHSCORES".data
 let LPUSH = "LPUSH".data
 let LPOP = "LPOP".data
 let LLEN = "LLEN".data
+let LRANGE = "LRANGE".data
 let HSET = "HSET".data
 let HGET = "HGET".data
 let one = "1".data
