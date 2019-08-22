@@ -160,7 +160,7 @@ extension Redis
     /// - Parameter key: The keys.
     /// - Returns: Array reply - all elements of the set.
     /// - Throws: a RedisError.
-    public func smbembers(key: Datable) throws -> RedisType {
+    public func smembers(key: Datable) throws -> RedisType {
       return try sendCommand(SMEMBERS, values: [key])
     }
     

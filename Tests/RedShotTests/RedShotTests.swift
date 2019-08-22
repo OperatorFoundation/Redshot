@@ -138,7 +138,7 @@ final class RedShotTests: XCTestCase
         let sadd = try redis.sadd(key: "myset", values: "world", "mundo", "monde", "welt")
         XCTAssertEqual((sadd as? Int), 4)
 
-        let smembers = try redis.smbembers(key: "myset")
+        let smembers = try redis.smembers(key: "myset")
         XCTAssertEqual((smembers as? Array<RedisType>)?.count, 4)
 
         XCTAssertThrowsError(try redis.sendCommand("TTT", values: []))
