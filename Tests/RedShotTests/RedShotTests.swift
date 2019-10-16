@@ -375,6 +375,30 @@ final class RedShotTests: XCTestCase
         }
     }
     
+    func testhkeys()
+    {
+        do
+        {
+            let key = "TEST_HASH"
+            let field = "MY_KEY"
+            let redis = try Redis(hostname: hostname, port: port, password: nil)
+            let _ = try redis.hset(key: key, field: "MY_KEY", value: "my value")
+            let hkeysResult = try redis.hkeys(key: key)
+            
+            switch hkeysResult
+            {
+            case let arrayResult as [String]:
+                XCTAssertEqual(arrayResult[0], field)
+            default:
+                print("HKeys result type is not a String Array: \(hkeysResult)")
+            }
+        }
+        catch
+        {
+            XCTFail("HKEYS threw an error : \(error.localizedDescription)")
+        }
+    }
+    
     func testsetMaxScore()
     {
         do {

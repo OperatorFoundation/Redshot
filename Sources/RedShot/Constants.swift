@@ -29,4 +29,5 @@ let LLEN = "LLEN".data
 let LRANGE = "LRANGE".data
 let HSET = "HSET".data
 let HGET = "HGET".data
+let HKEYS = "HGET".data
 let one = "1".data

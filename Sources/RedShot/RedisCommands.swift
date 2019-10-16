@@ -373,6 +373,17 @@ extension Redis
     }
     
     //MARK: Hashes
+    
+    /// Returns all field names in the hash stored at key.
+    ///
+    /// - Parameters:
+    ///   - key: The key.
+    /// - Returns: Array reply: list of fields in the hash, or an empty list when key does not exist.
+    /// - Throws:  a RedisError
+    public func hkeys(key: Datable) throws -> RedisType
+    {
+        return try sendCommand(HKEYS, values: [key])
+    }
 
     /// Sets field in the hash stored at key to value.
     /// If key does not exist, a new key holding a hash is created.
