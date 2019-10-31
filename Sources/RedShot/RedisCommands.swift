@@ -231,16 +231,28 @@ extension Redis
     ///   - increment: the interger value to increment by
     /// - Returns: the new score of the member.
     /// - Throws: a RedisError.
-    
-    public func zincrby(setKey: Datable, increment: Double, fieldKey: Datable) throws -> RedisType {
+    public func zincrby(setKey: Datable, increment: Double, fieldKey: Datable) throws -> RedisType
+    {
         if increment == 1 {
             return try sendCommand(ZINCRBY, values: [setKey, one, fieldKey])
         } else {
             return try sendCommand(ZINCRBY, values: [setKey, "\(increment)", fieldKey])
         }
     }
+    
+    /// If member does not exist in the sorted set, or key does not exist, error is thrown.
+    /// - Parameters:
+    ///   - setKey: (Datable) The key for the set to look in.
+    ///   - fieldKey: (Datable) The key of the field for which you want the score.
+    /// - Returns: (RedisType) The score of member (a double precision floating point number), represented as string.
+    /// - Throws: A RedisError.
+    public func zscore(setKey: Datable, fieldKey: Datable) throws -> RedisType
+    {
+        return try sendCommand(ZSCORE, values: [setKey, fieldKey])
+    }
 
-    public func zrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType {
+    public func zrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType
+    {
         //ZRANGE setKey minIndex maxIndex
         //ZRANGE setKey minIndex maxIndex WITHSCORES
         
