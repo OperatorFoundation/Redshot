@@ -12,6 +12,7 @@ let star = "*".data
 let rn = "\r\n".data
 let dollar = "$".data
 
+let PING = "PING".data
 let SADD = "SADD".data
 let SMEMBERS = "SMEMBERS".data
 let ZADD = "ZADD".data

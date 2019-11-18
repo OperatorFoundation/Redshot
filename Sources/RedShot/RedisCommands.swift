@@ -31,6 +31,33 @@ extension Redis
         
     }
     
+    public func ping() -> Bool
+    {
+        do
+        {
+            let response: RedisType = try sendCommand(PING, values: [])
+            
+            guard let stringResponse = response as? String
+            else
+            {
+                return false
+            }
+            
+            if stringResponse == "PONG"
+            {
+                return true
+            }
+            else
+            {
+                return false
+            }
+        }
+        catch
+        {
+            return false
+        }
+    }
+    
     public func configSet(key: String, value: Datable) throws -> Bool
     {
         do {

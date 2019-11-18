@@ -17,10 +17,10 @@ final class RedShotTests: XCTestCase
 {
     #if os(Linux)
     let hostname = "redis"
-    let port = 6379
+    let port = 6380
     #else
     let hostname = "localhost"
-    let port = 6379
+    let port = 6380
     #endif
 
     static var allTests = [
@@ -34,6 +34,18 @@ final class RedShotTests: XCTestCase
         ("testSelect", testSelect),
         ("testhset", testhset)
     ]
+    
+    func testPing()
+    {
+        guard let redis = try? Redis(hostname: hostname, port: port, password: nil)
+        else
+        {
+            XCTFail()
+            return
+        }
+        
+        XCTAssertTrue(redis.ping())
+    }
 
     func testSubscribe() throws
     {
