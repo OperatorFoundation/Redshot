@@ -12,6 +12,10 @@
 import Foundation
 import Dispatch
 
+#if os(Linux)
+import FoundationNetworking
+#endif
+
 import Datable
 
 class RedisSocket: NSObject {
