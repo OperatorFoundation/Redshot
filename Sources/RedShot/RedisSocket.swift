@@ -24,6 +24,7 @@ class RedisSocket: NSObject {
 
     var writeGroup: DispatchGroup
     var readGroup: DispatchGroup
+    var readBuffer = Data()
 
     init(hostname: String, port: Int) throws {
         stream = session.streamTask(withHostName: hostname, port: port)
@@ -34,21 +35,45 @@ class RedisSocket: NSObject {
     }
 
     func read() -> Data? {
-        var result: Data?
-        
+        // Refresh the buffer
+        readBuffer = Data()
         readGroup.enter()
-        stream.readData(ofMinLength: 1, maxLength: 4096, timeout: 0) {
-            (maybeData, atEof, maybeError) in
-            
-            if let data = maybeData {
-                result=data
-            }
-            
-            self.readGroup.leave()
-        }
+        readAll()
         readGroup.wait()
 
-        return result
+        return readBuffer
+    }
+    
+    func readAll(timeout: TimeInterval = 0)
+    {
+        let maxLength = 4096
+        
+        stream.readData(ofMinLength: 1, maxLength: maxLength, timeout: timeout) {
+            (maybeData, atEof, maybeError) in
+            
+            guard maybeError == nil
+            else {
+                self.readGroup.leave()
+                return
+            }
+            
+            guard let data = maybeData
+            else {
+                self.readGroup.leave()
+                return
+            }
+            
+            self.readBuffer.append(data)
+            
+            if data.count == maxLength
+            {
+                self.readAll(timeout: 2)
+            }
+            else
+            {
+                self.readGroup.leave()
+            }
+        }
     }
 
     func send(_ datable: Data) throws {
