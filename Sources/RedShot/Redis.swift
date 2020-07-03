@@ -59,7 +59,7 @@ public class Redis {
         }
     }
     
-    @discardableResult public func sendCommand(_ cmd: Datable, values: [Datable]) throws -> RedisType {
+    @discardableResult public func sendCommand(_ cmd: Datable, values: [Any]) throws -> RedisType {
         self.mutex.wait()
         
         do {
@@ -102,7 +102,7 @@ public class Redis {
         }
     }
     
-    private func sendRedisBulkString(_ value: Datable) throws {
+    private func sendRedisBulkString(_ value: Any) throws {
         do {
             try redisSocket.send(dollar)
             
@@ -124,7 +124,7 @@ public class Redis {
                     let stringValue = String(doubleValue)
                     data = stringValue.data
                 default:
-                    data = value.data
+                    throw RedisError.failedRead
             }
             
             let strLength = data.count

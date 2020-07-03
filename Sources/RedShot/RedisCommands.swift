@@ -194,7 +194,7 @@ extension Redis
     //MARK: Sorted Sets
     
     /// Adds all the specified members with scores of 0 to the sorted set stored at key.
-    public func zadd(key: Datable, elements: [Datable]) throws -> RedisType
+    public func zadd(key: Datable, elements: [Any]) throws -> RedisType
     {
         var values = [key]
         for element in elements
