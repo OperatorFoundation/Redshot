@@ -11,7 +11,6 @@
 
 import Foundation
 import Dispatch
-import Datable
 
 public enum RedisError: Error {
     case connection(String)
@@ -59,7 +58,7 @@ public class Redis {
         }
     }
     
-    @discardableResult public func sendCommand(_ cmd: Datable, values: [Any]) throws -> RedisType {
+    @discardableResult public func sendCommand(_ cmd: RedisType, values: [RedisType]) throws -> RedisType {
         self.mutex.wait()
         
         do {
@@ -102,11 +101,11 @@ public class Redis {
         }
     }
     
-    private func sendRedisBulkString(_ value: Any) throws {
+    private func sendRedisBulkString(_ value: RedisType) throws {
         do {
             try redisSocket.send(dollar)
             
-            let data: Data //= value.data
+            let data: Data
             
             switch value
             {

@@ -10,7 +10,6 @@
 //
 
 import Foundation
-import Datable
 
 extension Redis
 {
@@ -58,7 +57,7 @@ extension Redis
         }
     }
     
-    public func configSet(key: String, value: Datable) throws -> Bool
+    public func configSet(key: String, value: RedisType) throws -> Bool
     {
         do {
             let response: RedisType = try sendCommand("config", values: ["set", key, value])
@@ -135,7 +134,7 @@ extension Redis
     /// - Parameter key: The key.
     /// - Returns: the value of key, or NSNull when key does not exist.
     /// - Throws: something bad happened.
-    public func get(key: Datable) throws -> RedisType {
+    public func get(key: RedisType) throws -> RedisType {
         return try sendCommand("GET", values: [key])
     }
 
@@ -149,7 +148,7 @@ extension Redis
     ///   - expire: If not nil, set the specified expire time, in milliseconds.
     /// - Returns: A simple string reply OK if SET was executed correctly.
     /// - Throws: something bad happened.
-    public func set(key: Datable, value: Datable, exist: Bool? = nil, expire: TimeInterval? = nil) throws -> RedisType {
+    public func set(key: RedisType, value: RedisType, exist: Bool? = nil, expire: TimeInterval? = nil) throws -> RedisType {
         var cmd = [key, value]
 
         if let exist = exist {
@@ -176,7 +175,7 @@ extension Redis
     /// - Returns: Integer reply - the number of elements that were added to the set,
     ///            not including all the elements already present into the set.
     /// - Throws: a RedisError.
-    public func sadd(key: Datable, values: Datable...) throws -> RedisType {
+    public func sadd(key: RedisType, values: RedisType...) throws -> RedisType {
         var vals = [key]
         vals.append(contentsOf: values)
         return try sendCommand(SADD, values: vals)
@@ -187,14 +186,14 @@ extension Redis
     /// - Parameter key: The keys.
     /// - Returns: Array reply - all elements of the set.
     /// - Throws: a RedisError.
-    public func smembers(key: Datable) throws -> RedisType {
+    public func smembers(key: RedisType) throws -> RedisType {
       return try sendCommand(SMEMBERS, values: [key])
     }
     
     //MARK: Sorted Sets
     
     /// Adds all the specified members with scores of 0 to the sorted set stored at key.
-    public func zadd(key: Datable, elements: [Any]) throws -> RedisType
+    public func zadd(key: RedisType, elements: [RedisType]) throws -> RedisType
     {
         var values = [key]
         for element in elements
@@ -214,7 +213,7 @@ extension Redis
         - count: number of elements to remove from the sorted set and return to the requestor. When left unspecified, the default value for count is 1. Specifying a count value that is higher than the sorted set's cardinality will not produce an error.
      - Returns: RedisType that should translate to an Array reply: list of popped elements and scores [value, score, value, score, etc.] sorted lowest to highest. When returning multiple elements, the one with the lowest score will be the first, followed by the elements with greater scores.
     */
-    public func zpopmin(key: Datable, count: Int?) throws -> RedisType
+    public func zpopmin(key: RedisType, count: Int?) throws -> RedisType
     {
         if let numberToPop = count
         {
@@ -234,7 +233,7 @@ extension Redis
      - count: number of elements to remove from the sorted set and return to the requestor. When left unspecified, the default value for count is 1. Specifying a count value that is higher than the sorted set's cardinality will not produce an error.
      - Returns: RedisType that should translate to an Array reply: list of popped elements and scores [value, score, value, score, etc.]. When returning multiple elements, the one with the highest score will be the first, followed by the elements with lower scores.
      */
-    public func zpopmax(key: Datable, count: Int?) throws -> RedisType
+    public func zpopmax(key: RedisType, count: Int?) throws -> RedisType
     {
         if let numberToPop = count
         {
@@ -258,7 +257,7 @@ extension Redis
     ///   - increment: the interger value to increment by
     /// - Returns: the new score of the member.
     /// - Throws: a RedisError.
-    public func zincrby(setKey: Datable, increment: Double, fieldKey: Datable) throws -> RedisType
+    public func zincrby(setKey: RedisType, increment: Double, fieldKey: RedisType) throws -> RedisType
     {
         if increment == 1 {
             return try sendCommand(ZINCRBY, values: [setKey, one, fieldKey])
@@ -269,16 +268,16 @@ extension Redis
     
     /// If member does not exist in the sorted set, or key does not exist, error is thrown.
     /// - Parameters:
-    ///   - setKey: (Datable) The key for the set to look in.
-    ///   - fieldKey: (Datable) The key of the field for which you want the score.
+    ///   - setKey: (RedisType) The key for the set to look in.
+    ///   - fieldKey: (RedisType) The key of the field for which you want the score.
     /// - Returns: (RedisType) The score of member (a double precision floating point number), represented as string.
     /// - Throws: A RedisError.
-    public func zscore(setKey: Datable, fieldKey: Datable) throws -> RedisType
+    public func zscore(setKey: RedisType, fieldKey: RedisType) throws -> RedisType
     {
         return try sendCommand(ZSCORE, values: [setKey, fieldKey])
     }
 
-    public func zrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType
+    public func zrange(setKey: RedisType, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType
     {
         //ZRANGE setKey minIndex maxIndex
         //ZRANGE setKey minIndex maxIndex WITHSCORES
@@ -290,7 +289,7 @@ extension Redis
         }
     }
     
-    public func zrevrange(setKey: Datable, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType {
+    public func zrevrange(setKey: RedisType, minIndex:Int = 0, maxIndex:Int = -1, withScores:Bool = false) throws -> RedisType {
         //ZREVRANGEBYSCORE setKey minIndex maxIndex
         //ZREVRANGEBYSCORE setKey minIndex maxIndex WITHSCORES
         
@@ -301,7 +300,7 @@ extension Redis
         }
     }
     
-    public func zrangebyscore(setKey: Datable, minScore: Double, maxScore: Double, withScores:Bool = false) throws -> RedisType
+    public func zrangebyscore(setKey: RedisType, minScore: Double, maxScore: Double, withScores:Bool = false) throws -> RedisType
     {
         if withScores
         {
@@ -336,7 +335,7 @@ extension Redis
     ///   - values: the values
     /// - Returns: Integer reply - the length of the list after the push operations.
     /// - Throws: a RedisError.
-    public func lpush(key: Datable, values: Datable...) throws -> RedisType {
+    public func lpush(key: RedisType, values: RedisType...) throws -> RedisType {
         var vals = [key]
         vals.append(contentsOf: values)
         return try sendCommand(LPUSH, values: vals)
@@ -347,7 +346,7 @@ extension Redis
     /// - Parameter key: The key.
     /// - Returns: Bulk string reply - the value of the first element, or nil when key does not exist.
     /// - Throws: a RedisError.
-    public func lpop(key: Datable) throws -> RedisType {
+    public func lpop(key: RedisType) throws -> RedisType {
       return try sendCommand(LPOP, values: [key])
     }
     
@@ -357,7 +356,7 @@ extension Redis
     /// - Parameter key: The key.
     /// - Returns: Integer reply: the length of the list at key.
     /// - Throws: a RedisError. An error is returned when the value stored at key is not a list.
-    public func llen(key: Datable) throws -> RedisType {
+    public func llen(key: RedisType) throws -> RedisType {
         return try sendCommand(LLEN, values: [key])
     }
     
@@ -369,7 +368,7 @@ extension Redis
     /// - Parameter stop: The start index.
     /// - Returns: Array reply: list of elements in the specified range.
     /// - Throws: a RedisError. An error is returned when the value stored at key is not a list.
-    public func lrange(key: Datable, start: Int, stop: Int) throws -> RedisType {
+    public func lrange(key: RedisType, start: Int, stop: Int) throws -> RedisType {
         return try sendCommand(LRANGE, values: [key, start, stop])
     }
 
@@ -397,7 +396,7 @@ extension Redis
     /// - Parameter key: The key.
     /// - Returns: Integer reply - the value of key after the increment
     /// - Throws: a RedisError
-    public func incr(key: Datable) throws -> RedisType {
+    public func incr(key: RedisType) throws -> RedisType {
     	return try sendCommand("INCR", values: [key])
     }
 
@@ -419,7 +418,7 @@ extension Redis
     ///   - key: The key.
     /// - Returns: Array reply: list of fields in the hash, or an empty list when key does not exist.
     /// - Throws:  a RedisError
-    public func hkeys(key: Datable) throws -> RedisType
+    public func hkeys(key: RedisType) throws -> RedisType
     {
         return try sendCommand(HKEYS, values: [key])
     }
@@ -436,7 +435,7 @@ extension Redis
     ///            1 if field is a new field in the hash and value was set.
     ///            0 if field already exists in the hash and the value was updated.
     /// - Throws:  a RedisError
-    public func hset(key: Datable, field: Datable, value: Datable) throws -> RedisType {
+    public func hset(key: RedisType, field: RedisType, value: RedisType) throws -> RedisType {
         return try sendCommand(HSET, values: [key, field, value])
     }
 
@@ -448,7 +447,7 @@ extension Redis
     /// - Returns: Bulk string reply: the value associated with field, or nil when field is not present in the hash
     ///            or key does not exist.
     /// - Throws: a RedisError
-    public func hget(key: Datable, field: Datable) throws -> RedisType {
+    public func hget(key: RedisType, field: RedisType) throws -> RedisType {
         return try sendCommand(HGET, values: [key, field])
     }
 
@@ -457,7 +456,7 @@ extension Redis
     /// - Parameter key: The key.
     /// - Returns: a dictionary.
     /// - Throws: a RedisError
-    public func hgetAll(key: Datable) throws -> [Data: Data] {
+    public func hgetAll(key: RedisType) throws -> [Data: Data] {
         var dictionary: [Data: Data] = [:]
         if let result = try sendCommand("HGETALL", values: [key]) as? Array<Data> {
             let tuples = stride(from: 0, to: result.count, by: 2).map { num in
@@ -485,7 +484,7 @@ extension Redis
     /// - Returns: an Int.
     /// - Throws: a RedisError
     
-    public func hincrby(hashKey: Datable, increment: Int, fieldKey: Datable) throws -> RedisType
+    public func hincrby(hashKey: RedisType, increment: Int, fieldKey: RedisType) throws -> RedisType
     {
         return try sendCommand("HINCRBY", values: [hashKey, fieldKey, "\(increment)"])
     }
@@ -499,7 +498,7 @@ extension Redis
     ///   - field: The field in the hash to delete
     /// - Returns: Integer reply: the number of fields that were removed from the hash, not including specified but non existing fields.
     /// - Throws: a RedisError
-    public func hdel(key: Datable, field: Datable) throws -> RedisType {
+    public func hdel(key: RedisType, field: RedisType) throws -> RedisType {
         return try sendCommand("HDEL", values: [key, field])
     }
     

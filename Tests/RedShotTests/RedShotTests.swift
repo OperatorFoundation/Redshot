@@ -256,7 +256,7 @@ final class RedShotTests: XCTestCase
         {
             let redis = try Redis(hostname: hostname, port: port, password: nil)
             let testZaddKey = "TestZaddKey"
-            let testList: Array<Datable> = ["cats", "and", "dogs", "together?!??"]
+            let testList: Array<RedisType> = ["cats", "and", "dogs", "together?!??"]
             let zaddResult = try redis.zadd(key: testZaddKey, elements: testList)
             
             XCTAssertEqual(zaddResult as? Int, testList.count)
